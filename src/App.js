@@ -1,5 +1,6 @@
 import { Participant } from './components/participant';
 import { useState, useEffect } from 'react';
+import { Spinner } from './components/spinner';
 
 function App() {
 
@@ -18,20 +19,22 @@ function App() {
       setItems(prevItems => [...prevItems, ...data.data]);
       setPage(prevPage => prevPage + 1);
     } catch (error) {
-      setError(error);
+      console.log(JSON.stringify(error))
+      setError('Error calling API');
     } finally {
       setIsLoading(false);
     }
   }
 
   useEffect(() => {
-    fetchData()
+    fetchData();
   }, [])
 
   const handleScroll = () => {
     if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || isLoading) {
       return;
     }
+
     fetchData();
   };
 
@@ -39,6 +42,17 @@ function App() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isLoading]);
+
+  const toggleActivation = (item, i) => {
+    item.name = 'Some user 123';
+    var data = [...items];
+    data.forEach(a => {
+      if (a["_id"] === item["_id"]) {
+        data[i] = item;
+      }
+    })
+    setItems([...data]);
+  }
 
   return (
     <main>
@@ -49,11 +63,13 @@ function App() {
             <ul className='tasks-list'>
               {
                 items.map(item => (
-                  <Participant />
+                  <Participant item={item} toggle={toggleActivation} />
                 ))
               }
             </ul>
           )}
+          {isLoading && <Spinner />}
+          {error && <div>{error}</div>}
         </section>
       </article>
     </main>
